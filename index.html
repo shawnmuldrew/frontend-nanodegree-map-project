@@ -8,14 +8,14 @@
 </head>
 <body>
   <h2>Stations</h2>
-    <ul data-bind="foreach: mapLocationList">
+    <ul data-bind="foreach: stationList">
       <li>
-        <span data-bind="click: $parent.switchMapLocation(), text: $data.title"> </span>
+        <span data-bind="click: $parent.switchStation(), text: $data.title"> </span>
       </li>
     </ul>
   <div id="map"></div>
   <script src="js/lib/knockout-3.4.0.js"></script>
   <script src="js/map.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script> 
 </body>
 </html>
