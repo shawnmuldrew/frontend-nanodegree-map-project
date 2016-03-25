@@ -40,20 +40,22 @@ var ViewModel = function() {
 
   stationList.forEach(function(stationItem){
     self.stationLocation.push( new station(stationItem) );
-    addMarker({lat: stationItem.latitude, lng: stationItem.longitude},stationItem.icon);
+    addMarker({lat: stationItem.latitude, lng: stationItem.longitude},stationItem.title,stationItem.icon);
   });
 
   this.currentStation = ko.observable(this.stationLocation()[0] );
 
-  this.switchStation = function(clickedMapLocation) {
-    self.currentStation(clickedMapLocation);
-  //  setMapOnAll(map);
+  this.switchStation = function(clickedStation) {
+    self.currentStation(clickedStation);
+    console.log(self.currentStation().title);
+    setMapOnAll(map);
   };
 
   // Adds a marker to the map and push to the array.
-  function addMarker(location,icon) {
+  function addMarker(location,title,icon) {
     var marker = new google.maps.Marker({
       position: location,
+      title: title,
       icon: icon,
       map: map
     });
