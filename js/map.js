@@ -48,7 +48,8 @@ var ViewModel = function() {
   this.switchStation = function(clickedStation) {
     self.currentStation(clickedStation);
     console.log(self.currentStation().title);
-    setMapOnAll(map);
+//    setMapOnAll(map);
+    setCurrentStation(map,self.currentStation().title,blue,green);
   };
 
   // Adds a marker to the map and push to the array.
@@ -65,7 +66,19 @@ var ViewModel = function() {
   // Set markers on map for all in the array.
   function setMapOnAll(map) {
     for (var i = 0; i < markers.length; i++) {
-      markers[i].setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+      markers[i].setIcon(green);
+      markers[i].setMap(map);
+    }
+  }
+
+  // Set current station to different colour.
+  function setCurrentStation(map,currentStationTitle,baseColor,currentColor) {
+    for (var i = 0; i < markers.length; i++) {
+      if (markers[i].title == currentStationTitle) {
+        markers[i].setIcon(currentColor);
+      } else {
+        markers[i].setIcon(baseColor);
+      }
       markers[i].setMap(map);
     }
   }
