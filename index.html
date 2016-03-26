@@ -8,6 +8,7 @@
 </head>
 <body>
   <h2>Stations</h2>
+  <div class="mainLayout">
     <ul data-bind="foreach: stationList">
       <li>
         <span data-bind="click: $parent.switchStation, text: $data.title"> </span>
@@ -17,7 +18,8 @@
       <h2 data-bind="text: title"></h2>
       <div data-bind="text: address"></div>
     </div>
-  <div id="map"></div>
+  </div>
+  <div id="map" class="mainLayout"></div>
   <script src="js/lib/knockout-3.4.0.js"></script>
   <script src="js/map.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script> 

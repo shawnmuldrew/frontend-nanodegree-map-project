@@ -1,6 +1,26 @@
 #map {
-  display: block;
-  height: 800px;
-  width: 1000px;
+  margin: 20px 0;
+  padding: 0;
+  height: 100%;
+  float: left;
+  width: 50%;
 }
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    border: 1px solid #ddd;
+}
+
+ul li {
+    padding: 8px 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+ul li:last-child {
+    border-bottom: none
+}
+
+body,html{height:100%}
+div.mainLayout{float:left;width:50%}
 
