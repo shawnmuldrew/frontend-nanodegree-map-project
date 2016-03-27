@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Neighbourhood Map</title>
     <!-- Load the page styles. -->
     <link href="css/style.css" rel="stylesheet">
-</head>
-<body>
-  <h2>Stations</h2>
-  <div class="mainLayout">
-    <ul data-bind="foreach: stationList">
-      <li>
-        <span data-bind="click: $parent.switchStation, text: $data.title"> </span>
-      </li>
-    </ul>
-   <div data-bind="with:currentStation">
-      <h2 data-bind="text: title"></h2>
-      <div data-bind="text: address"></div>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <script type="text/javascript" src="js/jquery-1.11.3.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h2>Stations</h2>
+        </div>
+        <div class="col-md-4">
+          <ul data-bind="foreach: stationList">
+            <li>
+              <span data-bind="click: $parent.switchStation, text: $data.title"> </span>
+            </li>
+          </ul>
+          <div data-bind="with:currentStation">
+            <h2 data-bind="text: title"></h2>
+            <div data-bind="text: address"></div>
+          </div>
+        </div>
+        <div class="col-md-8"><div id="map"></div></div>
+        <script src="js/lib/knockout-3.4.0.js"></script>
+        <script src="js/map.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script> 
+      </div>
     </div>
-  </div>
-  <div id="map" class="mainLayout"></div>
-  <script src="js/lib/knockout-3.4.0.js"></script>
-  <script src="js/map.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script> 
-</body>
+  </body>
 </html>
