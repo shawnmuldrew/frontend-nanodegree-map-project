@@ -7,16 +7,16 @@
     <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap.css">
     <script type="text/javascript" src="js/jquery-1.11.3.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
   </head>
   <body>
     <div class="container">
       <div class="row">
         <div class="col-md-12">
-          <h2>Stations</h2>
+          <h2>Edmonton Metro Line Stations</h2>
         </div>
         <div class="col-md-4">
-          <ul data-bind="foreach: stationList">
+          <ul data-bind="foreach: stationList.sort(function(l, r) { return (l.order == r.order) ? (l.order > r.order ? 1 : -1) : (l.order > r.order ? 1 : -1) })">
             <li>
               <span data-bind="click: $parent.switchStation, text: $data.title"> </span>
             </li>
