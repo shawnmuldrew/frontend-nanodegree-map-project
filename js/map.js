@@ -84,6 +84,8 @@ var ViewModel = function() {
     for (var i = 0; i < markers.length; i++) {
       if (markers[i].title == currentStationTitle) {
         markers[i].setIcon(currentColor);
+      console.log('nextThree: '+getNextTrains());
+        infowindows[i].setContent(infowindows[i].getContent()+getNextTrains());
         infowindows[i].open(map,markers[i]);
       } else {
         markers[i].setIcon(baseColor);
@@ -92,6 +94,45 @@ var ViewModel = function() {
       markers[i].setMap(map);
     }
   }
+
+  // ETS AJAX request
+  function getNextTrains() {
+    var nextThree; 
+    var etsUrl = 'https://data.edmonton.ca/resource/xeux-ngrz.json?$query=SELECT%20arrival_time_2%20WHERE%20stop_id=%222316%22%20AND%20stop_headsign=%22Century%20Park%22%20GROUP%20BY%20arrival_time_2%20ORDER%20BY%20arrival_time_2%20ASC';
+    $.ajax({
+      url: etsUrl,
+      dataType: 'json',
+      async: false,
+      success: function(data) {
+    //$.getJSON(etsUrl, function(data) {
+      arrivalTimes = data;
+      console.log(arrivalTimes.length);
+      console.log(timeNow());
+      var i = 0;
+      var arrivalTime = arrivalTimes[i].arrival_time_2;
+      while (timeNow() > arrivalTime) {
+        i++;
+        arrivalTime = arrivalTimes[i].arrival_time_2;
+        if (i > arrivalTimes.length) {
+          break;
+        }
+      }
+      nextThree = '<p> Next Three Trains: <br>'+arrivalTimes[i].arrival_time_2+'<br>'+arrivalTimes[i+1].arrival_time_2+'<br>'+arrivalTimes[i+2].arrival_time_2+'</p>';
+      }
+    });//.error(function(){
+     // console.log("Could not load data!!!");
+    //});
+    console.log('Test: '+nextThree);
+    return nextThree;
+};
+
+  function timeNow() {
+  var d = new Date(),
+      h = (d.getHours()<10?'0':'') + d.getHours(),
+      m = (d.getMinutes()<10?'0':'') + d.getMinutes(),
+      s = (d.getSeconds()<10?'0':'') + d.getSeconds();
+  return h + ':' + m + ':' + s;
+}
 
 };
 
