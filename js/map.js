@@ -108,17 +108,14 @@ var ViewModel = function() {
     }
   }
 
-  // Set current station to different colour.
+  // Set current station to different colour and show infowindow with next train times.
   function setCurrentStation(map,currentStationTitle,baseColor,currentColor) {
     for (var i = 0; i < markers.length; i++) {
       if (markers[i].title == currentStationTitle) {
         markers[i].setIcon(currentColor);
-        console.log('northStop: '+self.currentStation().northStop());
-        console.log('southStop: '+self.currentStation().southStop());
         var stationInfo = '<p><b>'+self.currentStation().title()+'</b></p>'+'<p>'+self.currentStation().address()+'</p>';
         var northStopTimes = getNextTrains('north',self.currentStation().northStop());
         var southStopTimes = getNextTrains('south',self.currentStation().southStop());
-        //infowindows[i].setContent('<p><b>'+self.currentStation().title()+'</b></p>'+'<p>'+self.currentStation().address()+'</p>'+getNextTrains());
         infowindows[i].setContent(stationInfo+northStopTimes+southStopTimes);
         infowindows[i].open(map,markers[i]);
       } else {
@@ -130,6 +127,7 @@ var ViewModel = function() {
   }
 
   // ETS JSON request
+  // Note: using standard JSON request as it needs to be synchronous to be able to provide live tmes to infowindow
   function getNextTrains(direction,stop_id) {
     var nextThree; 
     if (direction == 'south') {
@@ -137,18 +135,13 @@ var ViewModel = function() {
     } else {
       var stop_headsign = 'Clareview';
     }
-    console.log('stop_id: '+stop_id+' stop_headsign: '+stop_headsign);
-    //var etsUrl = 'https://data.edmonton.ca/resource/xeux-ngrz.json?$query=SELECT%20arrival_time_2%20WHERE%20stop_id=%222316%22%20AND%20stop_headsign=%22Century%20Park%22%20GROUP%20BY%20arrival_time_2%20ORDER%20BY%20arrival_time_2%20ASC';
     var etsUrl = 'https://data.edmonton.ca/resource/xeux-ngrz.json?$query=SELECT%20arrival_time_2%20WHERE%20stop_id=%22'+stop_id+'%22%20AND%20stop_headsign=%22'+stop_headsign+'%22%20GROUP%20BY%20arrival_time_2%20ORDER%20BY%20arrival_time_2%20ASC';
-    console.log('url: '+etsUrl);
     $.ajax({
       url: etsUrl,
       dataType: 'json',
       async: false,
       success: function(data) {
         arrivalTimes = data;
-        console.log(arrivalTimes.length);
-        console.log(timeNow());
         var i = 0;
         if (arrivalTimes.length > 0) {
           var arrivalTime = arrivalTimes[i].arrival_time_2;
@@ -167,12 +160,20 @@ var ViewModel = function() {
         } else {
             nextThree = 'No Train Times Available';
         }
+      },
+      error: function(jqXHR, exception) {
+        if (direction == 'south') {
+          nextThree = '<p> South Trains: <br>Unable to access ETS stop times</p>';
+        } else {
+          nextThree = '<p> North Trains: <br>Unable to access ETS stop times</p>';
+        }
+        console.log('Status: '+jqXHR.status+' Exception: '+exception);
       }
     });
-    console.log('Test: '+nextThree);
     return nextThree;
 };
 
+  // Get current time. Used to determine next train times
   function timeNow() {
     var d = new Date(),
         h = (d.getHours()<10?'0':'') + d.getHours(),
