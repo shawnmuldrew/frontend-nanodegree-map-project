@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Neighbourhood Map</title>
+    <title>Edmonton Transit Map</title>
     <!-- Load the page styles. -->
     <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap.css">
@@ -16,7 +16,8 @@
           <h2>Edmonton Metro Line Stations</h2>
         </div>
         <div class="col-md-4">
-          <ul data-bind="foreach: stationList.sort(function(l, r) { return (l.order == r.order) ? (l.order > r.order ? 1 : -1) : (l.order > r.order ? 1 : -1) })">
+          <p>Filter: <input data-bind="value: filter, valueUpdate: 'afterkeydown'" /></p> 
+          <ul data-bind="foreach: filteredStations().sort(function (l, r) { return l.order() > r.order() ? 1 : -1 })">
             <li>
               <span data-bind="click: $parent.switchStation, text: $data.title"> </span>
             </li>

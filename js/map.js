@@ -1,9 +1,5 @@
 // DATA MODEL
 
-var blue = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-var red = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-var green = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
-
 var stationList = [
     {title: 'McKernan/Belgravia LRT Station',latitude: 53.5105176626514,longitude: -113.525670719744,address: '114 Street 76 Avenue NW',icon: blue,order: 12},
     {title: 'Bay/Enterprise Square LRT Station',latitude: 53.5408338367352,longitude: -113.500257591202,address: '104 Street Jasper Avenue NW',icon: blue,order: 7},
@@ -22,33 +18,62 @@ var stationList = [
     {title: 'University LRT Station',latitude: 53.5248259947652,longitude: -113.521801205501,address: '100 University Station NW',icon: blue,order: 10}
   ];
 
+var blue = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+var red = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+var green = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+
 var markers = [];
 var infowindows = [];
 
-var station = function(data) {
+var Station = function(data) {
   this.title = ko.observable(data.title);
   this.latitude = ko.observable(data.latitude);
   this.longitude = ko.observable(data.longitude);
   this.address = ko.observable(data.address);
   this.icon = ko.observable(data.icon);
+  this.order = ko.observable(data.order);
 };
 
 // VIEW MODEL
+
 var ViewModel = function() {
   var self = this;
 
   this.stationLocation = ko.observableArray([]);
 
+  // Load observable array
   stationList.forEach(function(stationItem){
-    self.stationLocation.push( new station(stationItem) );
+    self.stationLocation.push( new Station(stationItem) );
     addMarker(stationItem);
   });
 
+  // Added because it's not included in knockout-3.4.0.js file
+  ko.utils.stringStartsWith = function (string, startsWith) {         
+          string = string || "";
+          if (startsWith.length > string.length)
+              return false;
+          return string.substring(0, startsWith.length) === startsWith;
+      }
+
+  // Filter stations
+  this.filter = ko.observable("");
+  this.filteredStations = ko.computed(function() {
+    var filter = this.filter().toLowerCase();
+    if (!filter) {
+      return this.stationLocation();
+    } else {
+      return ko.utils.arrayFilter(this.stationLocation(), function(aStation) {
+        return ko.utils.stringStartsWith(aStation.title().toLowerCase(), filter);
+      });
+    }
+  }, this);
+
+  // Set initial station
   this.currentStation = ko.observable(this.stationLocation()[0] );
 
   this.switchStation = function(clickedStation) {
     self.currentStation(clickedStation);
-    setCurrentStation(map,self.currentStation().title,blue,green);
+    setCurrentStation(map,self.currentStation().title(),blue,green);
   };
 
   // Adds a marker to the map and push to the array.
@@ -95,7 +120,7 @@ var ViewModel = function() {
     }
   }
 
-  // ETS AJAX request
+  // ETS JSON request
   function getNextTrains() {
     var nextThree; 
     var etsUrl = 'https://data.edmonton.ca/resource/xeux-ngrz.json?$query=SELECT%20arrival_time_2%20WHERE%20stop_id=%222316%22%20AND%20stop_headsign=%22Century%20Park%22%20GROUP%20BY%20arrival_time_2%20ORDER%20BY%20arrival_time_2%20ASC';
@@ -104,7 +129,6 @@ var ViewModel = function() {
       dataType: 'json',
       async: false,
       success: function(data) {
-    //$.getJSON(etsUrl, function(data) {
       arrivalTimes = data;
       console.log(arrivalTimes.length);
       console.log(timeNow());
@@ -119,20 +143,18 @@ var ViewModel = function() {
       }
       nextThree = '<p> Next Three Trains: <br>'+arrivalTimes[i].arrival_time_2+'<br>'+arrivalTimes[i+1].arrival_time_2+'<br>'+arrivalTimes[i+2].arrival_time_2+'</p>';
       }
-    });//.error(function(){
-     // console.log("Could not load data!!!");
-    //});
+    });
     console.log('Test: '+nextThree);
     return nextThree;
 };
 
   function timeNow() {
-  var d = new Date(),
-      h = (d.getHours()<10?'0':'') + d.getHours(),
-      m = (d.getMinutes()<10?'0':'') + d.getMinutes(),
-      s = (d.getSeconds()<10?'0':'') + d.getSeconds();
-  return h + ':' + m + ':' + s;
-}
+    var d = new Date(),
+        h = (d.getHours()<10?'0':'') + d.getHours(),
+        m = (d.getMinutes()<10?'0':'') + d.getMinutes(),
+        s = (d.getSeconds()<10?'0':'') + d.getSeconds();
+    return h + ':' + m + ':' + s;
+  }
 
 };
 
@@ -146,7 +168,9 @@ function initMap() {
     center: myLatLng,
     zoom: 12 
   });
+
   ko.applyBindings(new ViewModel());
+
 }
 
 
