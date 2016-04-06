@@ -34,6 +34,8 @@ var Station = function(data) {
   this.order = ko.observable(data.order);
   this.northStop = ko.observable(data.northStop);
   this.southStop = ko.observable(data.southStop);
+  this.marker = ko.observable(data.marker);
+  this.infowindow = ko.observable(data.infowindow);
 };
 
 // VIEW MODEL
@@ -45,33 +47,50 @@ var ViewModel = function() {
 
   // Load observable array
   stationList.forEach(function(stationItem){
-    self.stationLocation.push( new Station(stationItem) );
     //addMarker(stationItem);
-    addMarker(self.stationLocation()[self.stationLocation().length-1]);
+    //addMarker(self.stationLocation()[self.stationLocation().length-1]);
+    var marker = new google.maps.Marker({
+      position: {lat: stationItem.latitude, lng: stationItem.longitude},
+      title: stationItem.title,
+      icon: stationItem.icon,
+      map: map
+    });
+    var infowindow = new google.maps.InfoWindow({
+    content: ''
+    });
+    stationItem.marker = marker;
+    stationItem.infowindow = infowindow;
+    var nextStation = new Station(stationItem);
+    nextStation.marker().addListener('click', function() {
+      self.currentStation(nextStation);
+      setCurrentStation(map,self.currentStation().title(),blue,green);
+    });
+    self.stationLocation.push(nextStation);
   });
-
-  // Added because it's not included in the minified knockout-3.4.0.js file
-  ko.utils.stringStartsWith = function (string, startsWith) {         
-          string = string || "";
-          if (startsWith.length > string.length)
-              return false;
-          return string.substring(0, startsWith.length) === startsWith;
-      }
 
   // Filter stations
   this.filter = ko.observable("");
   this.filteredStations = ko.computed(function() {
     var filter = this.filter().toLowerCase();
     if (!filter) {
-      return this.stationLocation();
+      return ko.utils.arrayFilter(this.stationLocation(), function(aStation) {
+        aStation.marker().setVisible(true);
+        return true
+      });
     } else {
       return ko.utils.arrayFilter(this.stationLocation(), function(aStation) {
-        return ko.utils.stringStartsWith(aStation.title().toLowerCase(), filter);
+        if (aStation.title().toLowerCase().indexOf(filter) === 0) {
+          return true
+        } else {
+          aStation.marker().setVisible(false);
+          return false
+        };
       });
     }
   }, this);
 
   // Set initial station
+//  this.currentStation = ko.observable([]);
   this.currentStation = ko.observable(this.stationLocation()[0] );
 
   this.switchStation = function(clickedStation) {
@@ -94,35 +113,26 @@ var ViewModel = function() {
     });
     var infowindow = new google.maps.InfoWindow({
     content: ''
-    //content: '<p><b>'+stationItem.title+'</b></p>'+'<p>'+stationItem.address+'</p>'
     });
     markers.push(marker);
     infowindows.push(infowindow);
   }
 
-  // Set markers on map for all in the array.
-  function setAllMarkersOnMap(map,colour) {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setIcon(colour);
-      markers[i].setMap(map);
-    }
-  }
-
   // Set current station to different colour and show infowindow with next train times.
   function setCurrentStation(map,currentStationTitle,baseColor,currentColor) {
-    for (var i = 0; i < markers.length; i++) {
-      if (markers[i].title == currentStationTitle) {
-        markers[i].setIcon(currentColor);
+    for (var i = 0; i < self.stationLocation().length; i++) {
+      if (self.stationLocation()[i].title() == currentStationTitle) {
+        self.stationLocation()[i].marker().setIcon(currentColor);
         var stationInfo = '<p><b>'+self.currentStation().title()+'</b></p>'+'<p>'+self.currentStation().address()+'</p>';
         var northStopTimes = getNextTrains('north',self.currentStation().northStop());
         var southStopTimes = getNextTrains('south',self.currentStation().southStop());
-        infowindows[i].setContent(stationInfo+northStopTimes+southStopTimes);
-        infowindows[i].open(map,markers[i]);
+        self.stationLocation()[i].infowindow().setContent(stationInfo+northStopTimes+southStopTimes);
+        self.stationLocation()[i].infowindow().open(map,self.stationLocation()[i].marker());
       } else {
-        markers[i].setIcon(baseColor);
-        infowindows[i].close(map,markers[i]);
+        self.stationLocation()[i].marker().setIcon(baseColor);
+        self.stationLocation()[i].infowindow().close(map,self.stationLocation()[i].marker());
       }
-      markers[i].setMap(map);
+      self.stationLocation()[i].marker().setMap(map);
     }
   }
 
