@@ -124,10 +124,9 @@ var ViewModel = function() {
       if (self.stationLocation()[i].title() == currentStationTitle) {
         self.stationLocation()[i].marker().setIcon(currentColor);
         var stationInfo = '<p><b>'+self.currentStation().title()+'</b></p>'+'<p>'+self.currentStation().address()+'</p>';
-        var northStopTimes = getNextTrains('north',self.currentStation().northStop());
-        var southStopTimes = getNextTrains('south',self.currentStation().southStop());
-        self.stationLocation()[i].infowindow().setContent(stationInfo+northStopTimes+southStopTimes);
-        self.stationLocation()[i].infowindow().open(map,self.stationLocation()[i].marker());
+        self.stationLocation()[i].infowindow().setContent(stationInfo); 
+        var northStopTimes = getNextTrains('north',self.currentStation().northStop(),self.stationLocation()[i]); 
+        var southStopTimes = getNextTrains('south',self.currentStation().southStop(),self.stationLocation()[i]);
       } else {
         self.stationLocation()[i].marker().setIcon(baseColor);
         self.stationLocation()[i].infowindow().close(map,self.stationLocation()[i].marker());
@@ -137,8 +136,15 @@ var ViewModel = function() {
   }
 
   // ETS JSON request
-  // Note: using standard JSON request as it needs to be synchronous to be able to provide live tmes to infowindow
-  function getNextTrains(direction,stop_id) {
+  // Two calls to the API are needed to complete this request and populate the infowindow.
+  // The first call is to get the next three arrival times for north bound trains and the second
+  // call is to get the next three arrival times for south bound trains. Due to this, extra logic
+  // was needed in the success section to ensure the window is populated and opened only after both
+  // asynchronous calls are completed.
+  // Note: Decided to build standard ajax call instead of getjson call so that certain aspects of
+  // application could be tested with synchronous set to true.  
+  //
+  function getNextTrains(direction,stop_id,stationClicked) {  
     var nextThree; 
     if (direction == 'south') {
       var stop_headsign = 'Century%20Park';
@@ -149,7 +155,7 @@ var ViewModel = function() {
     $.ajax({
       url: etsUrl,
       dataType: 'json',
-      async: false,
+//      async: false,
       success: function(data) {
         arrivalTimes = data;
         var i = 0;
@@ -170,12 +176,21 @@ var ViewModel = function() {
         } else {
             nextThree = 'No Train Times Available';
         }
+        if (direction == 'south') {
+          stationClicked.infowindow().setContent(stationClicked.infowindow().getContent()+nextThree);
+          stationClicked.infowindow().open(map,stationClicked.marker());
+        } else {
+          stationClicked.infowindow().setContent(stationClicked.infowindow().getContent()+nextThree);
+        }
       },
       error: function(jqXHR, exception) {
         if (direction == 'south') {
           nextThree = '<p> South Trains: <br>Unable to access ETS stop times</p>';
+          stationClicked.infowindow().setContent(stationClicked.infowindow().getContent()+nextThree);
+          stationClicked.infowindow().open(map,stationClicked.marker());
         } else {
           nextThree = '<p> North Trains: <br>Unable to access ETS stop times</p>';
+          stationClicked.infowindow().setContent(stationClicked.infowindow().getContent()+nextThree);
         }
         console.log('Status: '+jqXHR.status+' Exception: '+exception);
       }
