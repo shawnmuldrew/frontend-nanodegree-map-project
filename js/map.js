@@ -79,6 +79,12 @@ var ViewModel = function() {
           return true
         } else {
           aStation.marker().setVisible(false);
+          if (self.currentStation()) {
+            if (aStation.title() == self.currentStation().title()) {
+              self.currentStation(null);
+              setCurrentStation(map,null,blue,green);
+            }
+          }
           return false
         };
       });
@@ -86,8 +92,8 @@ var ViewModel = function() {
   }, this);
 
 // Set initial station
-//  this.currentStation = ko.observable([]);
-  this.currentStation = ko.observable(this.stationLocation()[0] );
+  this.currentStation = ko.observable(null);
+//  this.currentStation = ko.observable(this.stationLocation()[0] );
 
   this.switchStation = function(clickedStation) {
     self.currentStation(clickedStation);
