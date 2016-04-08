@@ -197,11 +197,6 @@ var ViewModel = function() {
     return h + ':' + m + ':' + s;
   }
 
-  // Google Map fails to load
-  function googleError() {
-    alert("Google Maps is unavailable");
-  }
-
 };
 
 // VIEW
