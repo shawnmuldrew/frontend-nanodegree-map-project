@@ -7,7 +7,10 @@
     <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap.css">
     <script type="text/javascript" src="js/jquery-1.11.3.js"></script>
-    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js" async></script>
+    <script src="js/lib/knockout-3.4.0.js" async></script>
+    <script src="js/map.js"></script>
+    <meta name="viewport" content="width=device-width">
   </head>
   <body>
     <div class="container">
@@ -24,9 +27,7 @@
           </ul>
         </div>
         <div class="col-md-8"><div id="map"></div></div>
-        <script src="js/lib/knockout-3.4.0.js"></script>
-        <script src="js/map.js"></script>
-        <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script> 
+        <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" onerror="googleError()" async defer></script> 
       </div>
       <div class="row">
         <div class="col-md-12">

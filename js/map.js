@@ -43,14 +43,18 @@ var ViewModel = function() {
 
   this.stationLocation = ko.observableArray([]);
 
+  var bounds = new google.maps.LatLngBounds();
+
   // Load observable array
   stationList.forEach(function(stationItem){
+    var markerLatLng = new google.maps.LatLng(stationItem.latitude, stationItem.longitude);
     var marker = new google.maps.Marker({
-      position: {lat: stationItem.latitude, lng: stationItem.longitude},
+      position: markerLatLng,
       title: stationItem.title,
       icon: stationItem.icon,
       map: map
     });
+    bounds.extend(markerLatLng);
     var infowindow = new google.maps.InfoWindow({
     content: ''
     });
@@ -64,6 +68,8 @@ var ViewModel = function() {
     self.stationLocation.push(nextStation);
   });
 
+  map.fitBounds(bounds);
+
   // Filter stations
   this.filter = ko.observable("");
   this.filteredStations = ko.computed(function() {
@@ -75,7 +81,7 @@ var ViewModel = function() {
       });
     } else {
       return ko.utils.arrayFilter(this.stationLocation(), function(aStation) {
-        if (aStation.title().toLowerCase().indexOf(filter) === 0) {
+        if (aStation.title().toLowerCase().indexOf(filter) != -1) {
           return true
         } else {
           aStation.marker().setVisible(false);
@@ -189,6 +195,11 @@ var ViewModel = function() {
         m = (d.getMinutes()<10?'0':'') + d.getMinutes(),
         s = (d.getSeconds()<10?'0':'') + d.getSeconds();
     return h + ':' + m + ':' + s;
+  }
+
+  // Google Map fails to load
+  function googleError() {
+    alert("Google Maps is unavailable");
   }
 
 };
